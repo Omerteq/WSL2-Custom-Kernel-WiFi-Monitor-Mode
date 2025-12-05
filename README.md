@@ -154,15 +154,58 @@ Windows ile USB bağlantısının kopmaması için:
 *(İşlemler bitince alttaki **`< Save >`** butonuna basıp kaydedin ve **`< Exit >`** ile çıkın.)*
 
 ###4. Derleme ve Optimizasyon
-# 1. Gereksiz Debug bilgilerini kapat (Linker hatalarını ve devasa boyutu önler)
+### 1. Gereksiz Debug bilgilerini kapat (Linker hatalarını ve devasa boyutu önler)
 scripts/config --disable CONFIG_DEBUG_INFO
 scripts/config --disable CONFIG_DEBUG_INFO_BTF
 scripts/config --disable CONFIG_DEBUG_INFO_DWARF4
 scripts/config --disable CONFIG_DEBUG_INFO_DWARF5
 scripts/config --disable CONFIG_PAHOLE_HAS_SPLIT_BTF
 
-# 2. Derlemeyi Başlat (GNU11 standardı zorlaması ile)
+### 2. Derlemeyi Başlat (GNU11 standardı zorlaması ile)
+```bash
 make -j$(nproc) KCONFIG_CONFIG=.config KCFLAGS="-std=gnu11"
-
+```
 
 İşlem bittiğinde derlenmiş çekirdeğiniz şu yolda hazır olacaktır: `arch/x86/boot/bzImage`
+
+---
+
+## 🏁 Derleme Sonrası: Windows Tarafında Kurulum
+
+Derleme işlemi başarıyla tamamlandığında ve `bzImage is ready` mesajını gördüğünüzde, yeni çekirdeği Windows'a tanıtmanız gerekir.
+
+### 1. Çekirdeği Windows'a Kopyalayın
+Derlenen çekirdek dosyası (`bzImage`) Linux dosya sistemindedir. Bunu Windows kullanıcı klasörünüze taşımak için terminalde şu komutu kullanın:
+
+```bash
+# "KullaniciAdiniz" kısmını kendi Windows kullanıcı adınızla değiştirin
+cp arch/x86/boot/bzImage /mnt/c/Users/KullaniciAdiniz/bzImage-wifi
+
+### 2. .wslconfig Dosyasını Oluşturun/Düzenleyin
+WSL2'nin varsayılan çekirdek yerine sizin derlediğinizi kullanması için bir ayar dosyası oluşturmalısınız.
+
+1.  Windows'ta `C:\Users\KullaniciAdiniz\` (Kullanıcı Klasörü) dizinine gidin.
+2.  Burada **`.wslconfig`** adında bir dosya oluşturun (Eğer yoksa).
+3.  Dosyayı Not Defteri ile açın ve şunları ekleyin:
+
+```ini
+[wsl2]
+kernel=C:\\Users\\KullaniciAdiniz\\bzImage-wifi
+```
+
+### 3. WSL'i Yeniden Başlatın
+Yeni ayarların geçerli olması için WSL'i tamamen kapatıp açmak şarttır.
+
+**PowerShell (Yönetici)** açın ve şu komutu girin:
+```powershell
+wsl --shutdown
+```
+
+
+### 4. Doğrulama (Büyük An) 🏆
+Kali Linux (veya kullandığınız dağıtımı) tekrar açın ve terminale şu komutu yazın:
+
+```bash
+uname -r
+
+
