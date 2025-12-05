@@ -81,7 +81,7 @@ iwconfig
 
 ---
 
-## 🛠️ Geliştirici Rehberi: Kendi Çekirdeğinizi Derleyin
+## Geliştirici Rehberi: Kendi Çekirdeğinizi Derleyin
 
 Bu çekirdeği kendiniz derlemek, farklı sürücüler eklemek veya süreci öğrenmek istiyorsanız aşağıdaki adımları takip edebilirsiniz. Bu rehber, **GCC 13+** derleyicilerinde karşılaşılan hataları (`false keyword`, `objtool`, `BTF`) giderecek şekilde hazırlanmıştır.
 
@@ -170,7 +170,7 @@ make -j$(nproc) KCONFIG_CONFIG=.config KCFLAGS="-std=gnu11"
 
 ---
 
-## 🏁 Derleme Sonrası: Windows Tarafında Kurulum
+## Derleme Sonrası: Windows Tarafında Kurulum
 
 Derleme işlemi başarıyla tamamlandığında ve `bzImage is ready` mesajını gördüğünüzde, yeni çekirdeği Windows'a tanıtmanız gerekir.
 
@@ -202,10 +202,11 @@ wsl --shutdown
 ```
 
 
-### 4. Doğrulama (Büyük An) 🏆
+### 4. Doğrulama (Büyük An) 
 Kali Linux (veya kullandığınız dağıtımı) tekrar açın ve terminale şu komutu yazın:
 
 ```bash
 uname -r
-
+```
+Çıktının sonunda + işareti veya derleme tarihini görüyorsanız (Örn: `6.6.87.2-microsoft-standard-WSL2+`), tebrikler! Artık kendi derlediğiniz çekirdek üzerindesiniz.
 
