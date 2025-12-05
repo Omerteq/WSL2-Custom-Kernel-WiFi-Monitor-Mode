@@ -65,10 +65,15 @@ usbipd attach --wsl --busid 2-4
 
 
 ### 2. Linux Tarafı 
-`lsusb`
+```bash
+lsusb
+```
 Listede adaptörünüzün markasını (Ralink, MediaTek, Realtek vb.) görüyorsanız, donanım fiziksel olarak Linux'a bağlanmış demektir
 
-`iwconfig`
+monitormode aktif mi kontrol edin
+```bash
+iwconfig
+```
 
 Çıktıda `wlan0` veya benzeri bir ibare görüyorsanız tebrikler! Monitor moda geçmeye hazırsınız.
 
