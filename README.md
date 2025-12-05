@@ -79,4 +79,90 @@ iwconfig
 
 
 
+---
 
+## 🛠️ Geliştirici Rehberi: Kendi Çekirdeğinizi Derleyin
+
+Bu çekirdeği kendiniz derlemek, farklı sürücüler eklemek veya süreci öğrenmek istiyorsanız aşağıdaki adımları takip edebilirsiniz. Bu rehber, **GCC 13+** derleyicilerinde karşılaşılan hataları (`false keyword`, `objtool`, `BTF`) giderecek şekilde hazırlanmıştır.
+
+### 1. Gerekli Paketlerin Kurulumu
+Kali Linux (veya Ubuntu) üzerinde derleme araçlarını kurun:
+
+```bash
+sudo apt update
+sudo apt install build-essential flex bison libssl-dev libelf-dev libncurses-dev autoconf libudev-dev zlib1g-dev bc dwarves
+```
+###2. Kaynak Kodun İndirilmesi
+# Kullandığınız WSL çekirdek sürümünü öğrenin (Örn: 6.6.87.2)
+```bash
+uname -r
+```
+
+# O sürüme ait kaynak kodunu indirin (Microsoft Reposundan)
+```bash
+git clone --depth 1 --branch linux-msft-wsl-6.6.87.2 [https://github.com/microsoft/WSL2-Linux-Kernel.git](https://github.com/microsoft/WSL2-Linux-Kernel.git)
+cd WSL2-Linux-Kernel
+```
+###3. Konfigürasyonun Hazırlanması
+# Çalışan config dosyasını kopyala
+```bash
+cp /proc/config.gz config.gz
+gunzip config.gz
+mv config .config
+```
+# Menüyü aç ve Wi-Fi / USB ayarlarını yap
+```bash
+make menuconfig
+```
+
+### Menuconfig Yol Haritası (Adım Adım)
+
+Çekirdek ayar menüsünü (`make menuconfig`) açtıktan sonra, Wi-Fi kartınızı (MT7601U) aktif etmek için aşağıdaki yolu izleyin.
+
+**Navigasyon İpuçları:**
+* **Girmek için:** `Enter`
+* **Geri dönmek için:** `Esc` (iki kez)
+* **Seçmek (Gömülü yapmak) için:** `Y` tuşu (Yanında `<*>` işareti olmalı)
+
+#### 1. Wi-Fi Sürücüsünü Aktif Etme
+Şu yolu takip edin:
+1.  `Device Drivers` --->
+2.  `Network device support` --->
+3.  `Wireless LAN` --->
+4.  `MediaTek devices` --->
+5.  **`MediaTek MT7601U (USB) support`** seçeneğini bulun.
+    * Üzerine gelip **`Y`** tuşuna basın.
+    * Sol tarafında **`<*>`** işaretini gördüğünüzden emin olun. (`<M>` değil!)
+
+#### 2. Temel Wi-Fi Desteğini Açma (Önemli)
+Sürücünün çalışması için ana Wi-Fi yığınının da gömülü olması gerekir.
+1.  Ana menüye dönün.
+2.  `Networking support` --->
+3.  `Wireless` --->
+4.  **`cfg80211 - wireless configuration API`** ---> **`<*>` (Yıldızla)**
+5.  **`Generic IEEE 802.11 Networking Stack (mac80211)`** ---> **`<*>` (Yıldızla)**
+
+#### 3. USBIP Desteğini Kontrol Etme
+Windows ile USB bağlantısının kopmaması için:
+1.  Ana menüye dönün.
+2.  `Device Drivers` --->
+3.  `USB support` --->
+4.  **`Support for Host-side USB`** ---> **`<*>` (Yıldızla)**
+5.  **`USB/IP support`** ---> **`<*>` (Yıldızla)**
+
+---
+*(İşlemler bitince alttaki **`< Save >`** butonuna basıp kaydedin ve **`< Exit >`** ile çıkın.)*
+
+###4. Derleme ve Optimizasyon
+# 1. Gereksiz Debug bilgilerini kapat (Linker hatalarını ve devasa boyutu önler)
+scripts/config --disable CONFIG_DEBUG_INFO
+scripts/config --disable CONFIG_DEBUG_INFO_BTF
+scripts/config --disable CONFIG_DEBUG_INFO_DWARF4
+scripts/config --disable CONFIG_DEBUG_INFO_DWARF5
+scripts/config --disable CONFIG_PAHOLE_HAS_SPLIT_BTF
+
+# 2. Derlemeyi Başlat (GNU11 standardı zorlaması ile)
+make -j$(nproc) KCONFIG_CONFIG=.config KCFLAGS="-std=gnu11"
+
+
+İşlem bittiğinde derlenmiş çekirdeğiniz şu yolda hazır olacaktır: `arch/x86/boot/bzImage`
